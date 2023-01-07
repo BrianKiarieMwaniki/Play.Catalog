@@ -36,7 +36,7 @@ namespace Play.Catalog.Service.Controllers
         public ActionResult<ItemDto> CreateItem(CreateItemDto createItem)
         {
             var item = new ItemDto(Guid.NewGuid(), createItem.Name, createItem.Description, createItem.Price, DateTimeOffset.Now);
-            return CreatedAtAction(nameof(GetById),item.Id, item);
+            return CreatedAtAction(nameof(CreateItem),item.Id, item);
         }
     }
 }
