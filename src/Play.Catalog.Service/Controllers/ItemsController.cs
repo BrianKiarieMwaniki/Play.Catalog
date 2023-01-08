@@ -1,3 +1,4 @@
+using System.Net;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,11 +33,41 @@ namespace Play.Catalog.Service.Controllers
         }
 
         [HttpPost]
-        [ActionName(nameof(CreateItem))]
         public ActionResult<ItemDto> CreateItem(CreateItemDto createItem)
         {
             var item = new ItemDto(Guid.NewGuid(), createItem.Name, createItem.Description, createItem.Price, DateTimeOffset.Now);
-            return CreatedAtAction(nameof(CreateItem),item.Id, item);
+            return CreatedAtAction(nameof(GetById),new {id = item.Id}, item);
         }
+
+        [HttpPut("{id}")]
+        public IActionResult Put(Guid id, UpdateItemDto updateItemDto)
+        {
+            var existingItem = items.Where(i => i.Id == id).SingleOrDefault();
+
+            if(existingItem is null) return NotFound();
+
+            var updateItem = existingItem with{
+                Name = updateItemDto.Name,
+                Description = updateItemDto.Description,
+                Price = updateItemDto.Price
+            };
+
+            var index = items.FindIndex(existingItem => existingItem.Id == id);
+            items[index] = updateItem;
+
+            return NoContent();
+        }   
+
+        [HttpDelete("{id}")]
+        public IActionResult DeleteItem(Guid id)
+        {
+            var itemToDelete = items.Where(i => i.Id == id).SingleOrDefault();
+            if(itemToDelete is null) return NotFound("Opps!😪Item not found");
+
+            items.Remove(itemToDelete);
+
+            return NoContent();
+        }
+
     }
 }
