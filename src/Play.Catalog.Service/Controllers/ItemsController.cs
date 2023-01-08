@@ -26,9 +26,10 @@ namespace Play.Catalog.Service.Controllers
         }
 
         [HttpGet("{id}")]
-        public ItemDto GetById(Guid id)
+        public ActionResult<ItemDto> GetById(Guid id)
         {
             var item = items.Where(i => i.Id == id).SingleOrDefault();
+            if (item is null) return NotFound("Opps!😪Item was not found!");
             return item;
         }
 
@@ -36,7 +37,7 @@ namespace Play.Catalog.Service.Controllers
         public ActionResult<ItemDto> CreateItem(CreateItemDto createItem)
         {
             var item = new ItemDto(Guid.NewGuid(), createItem.Name, createItem.Description, createItem.Price, DateTimeOffset.Now);
-            return CreatedAtAction(nameof(GetById),new {id = item.Id}, item);
+            return CreatedAtAction(nameof(GetById), new { id = item.Id }, item);
         }
 
         [HttpPut("{id}")]
@@ -44,9 +45,10 @@ namespace Play.Catalog.Service.Controllers
         {
             var existingItem = items.Where(i => i.Id == id).SingleOrDefault();
 
-            if(existingItem is null) return NotFound();
+            if (existingItem is null) return NotFound();
 
-            var updateItem = existingItem with{
+            var updateItem = existingItem with
+            {
                 Name = updateItemDto.Name,
                 Description = updateItemDto.Description,
                 Price = updateItemDto.Price
@@ -56,15 +58,16 @@ namespace Play.Catalog.Service.Controllers
             items[index] = updateItem;
 
             return NoContent();
-        }   
+        }
 
         [HttpDelete("{id}")]
         public IActionResult DeleteItem(Guid id)
         {
-            var itemToDelete = items.Where(i => i.Id == id).SingleOrDefault();
-            if(itemToDelete is null) return NotFound("Opps!😪Item not found");
+            var index = items.FindIndex(i => i.Id == id);
 
-            items.Remove(itemToDelete);
+            if (index < 0) return NotFound("Opps!😪Item not found");
+
+            items.RemoveAt(index);
 
             return NoContent();
         }
