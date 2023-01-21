@@ -10,43 +10,47 @@ using Xunit;
 
 namespace Play.Catalog.Test.Controllers
 {
-
     public class ItemControllerTest
     {
         private const string baseApiUrl = "/api/items";
-        private readonly HttpClient _httpClient;
+        private readonly WebApplicationFactory<Program> _webAppFactory;
         public ItemControllerTest()
         {
-            var webAppFactory = new WebApplicationFactory<Program>();
-
-            _httpClient = webAppFactory.CreateDefaultClient();
+          _webAppFactory = new WebApplicationFactory<Program>();
         }
 
         [Fact]
         public async void GetAllItemsAsync()
         {
-            var response = await _httpClient.GetFromJsonAsync<List<ItemDto>>("/api/items");
+            using(var _httpClient = _webAppFactory.CreateDefaultClient())
+            {
 
-            Assert.NotNull(response);
+                var response = await _httpClient.GetFromJsonAsync<List<ItemDto>>("/api/items");
 
-            var itemDto = response?.FirstOrDefault();
+                Assert.NotNull(response);
 
-            Assert.Equal(itemDto.Price, 5);
-            Assert.Equal("Potion", itemDto.Name);
-            Assert.Equal("3b7728a5-358c-493d-9d74-2b83ea32c802", itemDto.Id.ToString());
+                var itemDto = response?.FirstOrDefault();
+
+                Assert.Equal(itemDto.Price, 5);
+                Assert.Equal("Potion", itemDto.Name);
+                Assert.Equal("3b7728a5-358c-493d-9d74-2b83ea32c802", itemDto.Id.ToString());
+            }
         }
 
         [Fact]
         public async void GetItemByIdAsync()
         {
-            var response = await _httpClient.GetFromJsonAsync<ItemDto>($"{baseApiUrl}/3b7728a5-358c-493d-9d74-2b83ea32c802");
+            using(var httpClient = _webAppFactory.CreateDefaultClient())
+            {
+                var response = await httpClient.GetFromJsonAsync<ItemDto>($"{baseApiUrl}/3b7728a5-358c-493d-9d74-2b83ea32c802");
 
-            var itemDto = response ?? null;
+                var itemDto = response ?? null;
 
-            Assert.NotNull(itemDto);
-            Assert.Equal(itemDto.Price, 5);
-            Assert.Equal("Potion", itemDto.Name);
-            Assert.Equal("3b7728a5-358c-493d-9d74-2b83ea32c802", itemDto.Id.ToString());
+                Assert.NotNull(itemDto);
+                Assert.Equal(itemDto.Price, 5);
+                Assert.Equal("Potion", itemDto.Name);
+                Assert.Equal("3b7728a5-358c-493d-9d74-2b83ea32c802", itemDto.Id.ToString());
+            }
 
         }
     }
